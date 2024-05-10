@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:redefineerp/Screens/Home/Generator.dart';
+import 'package:redefineerp/Screens/ProductListCategoryPopUp/product_category_list_controler.dart';
 import 'package:redefineerp/Screens/Task/task_controller.dart';
 import 'package:redefineerp/Screens/Task/task_manager.dart';
 import 'package:redefineerp/Utilities/custom_sizebox.dart';
@@ -22,7 +23,7 @@ import 'package:redefineerp/main.dart';
 import 'package:redefineerp/themes/textFile.dart';
 import 'package:redefineerp/themes/themes.dart';
 
-class HomePageController extends GetxController {
+class ProductListPageController extends GetxController {
   var validationSuccess = false.obs;
   @override
   void onInit() async {
@@ -121,13 +122,14 @@ class HomePageController extends GetxController {
   var streamCreatedWidget = sizeBox(0, 0).obs;
 
   //
-  TextEditingController taskTitle = TextEditingController();
+  TextEditingController productTitle = TextEditingController();
   TextEditingController productSize = TextEditingController();
-  TextEditingController minPrice = TextEditingController();
-  TextEditingController maxPrice = TextEditingController();
+  TextEditingController costPrice = TextEditingController();
+  TextEditingController sellPrice = TextEditingController();
   TextEditingController productMaterial = TextEditingController();
   TextEditingController productCategory = TextEditingController();
   TextEditingController commentLine = TextEditingController();
+    final productCategoryController = Get.put<ProductCategoryListPageController>(ProductCategoryListPageController());
 
   GlobalKey<FormState> taskKey = GlobalKey<FormState>();
   var taskType = 'mark'.obs;
@@ -164,6 +166,13 @@ class HomePageController extends GetxController {
   void updateSelectedDate() {
     selectedDateTime.value =
         DateFormat('dd-MM-yyyy kk:mm').format(dateSelected);
+  }
+  void increment( cart) {
+    cart['quantity']++;
+    // cart['cost'] = 300;
+    // calculateBilling();
+    print('cart value si ${cart}');
+    update();
   }
 
   flipMode(title) {
@@ -255,11 +264,14 @@ class HomePageController extends GetxController {
 
   checkTaskValidation() {
     final validator = taskKey.currentState!.validate();
+    
+print('value i s ${productTitle.text}');
+
 
     if (!validator) {
       return;
     } else {
-      if (assignedUserName == 'Assign someone') {
+      if ( productCategoryController.category == '???') {
         Get.snackbar(
             colorText: Get.theme.colorPrimaryDark,
             backgroundColor: Get.theme.overlayColor,
@@ -280,44 +292,21 @@ class HomePageController extends GetxController {
     // Get.reset();
     // Get.delete<TaskController>();
     print('hello ${ComponentsANew}');
+var x = {'product_name':  productTitle.text,'size': productSize.text, 'sell': sellPrice.text, 'cost': costPrice.text, 'type': '','cat': productCategoryController.category.value, 'imageUrl': '', 'vendors': [], 'services': [] };
+  ;
 
-    _collection
-        .add({
-          'task_title': taskTitle.text,
-          'task_desc': productSize.text,
-          'created_on': DateTime.now().millisecondsSinceEpoch,
-          'due_date': dateSelected.millisecondsSinceEpoch,
-          'by_email': auth.currentUser?.email,
-          'by_name': auth.currentUser?.displayName,
-          'by_uid': auth.currentUser?.uid,
-          'to_name': assignedUserName.value,
-          'to_uid': assignedUserUid.value,
-          'priority': taskPriority.value,
-          'atttachmentsA': attachmentsA.value,
-          'to_email': assignedUserEmail.value,
-          'dept': assignedUserDepartment.value,
-          'status': "InProgress",
-          'particpantsA': ComponentsANew.value,
-        })
-        .then((value) => {
-              print("Task Created for home  ${value.id}$assignedUserUid }"),
+    
+  
+          DbSupa.instance.addProducts(x).then((value) => {
+         
               Get.back(),
               snackBarMsg('Task Created!', enableMsgBtn: false),
-              sendPushMessage('Task Assigned for you:', taskTitle.text,
-                  assignedUserFcmToken.value),
 
-//                   // assinged to
-//                   DbSupa.instance.saveNotification(assignedUserUid.value, 'Task Assigned for you', taskId),
 
-//                   //send to followers
-// participantsANew.value.map((follerId)=>{
-//                   DbSupa.instance.saveNotification(assignedUserUid.value, 'Ur Following New Task', taskId),
-
-// })
-
-              taskTitle.clear(),
+              productTitle.clear(),
      
-              assignedUserName = 'Assign someone'.obs,
+        
+              productCategoryController.category = 'Assign someone'.obs
             })
         .catchError((error) => {
               print("Failed to create task: $error"),

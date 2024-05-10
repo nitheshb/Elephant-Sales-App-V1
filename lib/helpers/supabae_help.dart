@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
+import 'package:redefineerp/Screens/Products/productsList.dart';
 import 'package:supabase/supabase.dart';
 
 // class DbSupa {
@@ -65,9 +66,81 @@ class DbSupa {
     // } else {
     //   print('Notification saved  successfully');
     // }
+  }  
+  
+  void addVendors(userId, content, taskId) async {
+    final response = await supabaseClient.from('elephant_vendors').insert({
+      'name': userId,
+      'phNumber': content,
+      'location': taskId,
+    }); 
+  } 
+    
+   addProducts(x) async {
+    // final response = await supabaseClient.from('elephant_products').insert({
+    //   'product_name': userId,
+    //   'size': content,
+    //   'sell': taskId,
+    //   'cost': taskId, 
+    //   'imageUrl': taskId, 
+    //   'vendors': [taskId],
+    //   'type': taskId
+    // });
+    
+      final response = await supabaseClient.from('elephant_products').insert(x);
+
+    print(response);
+
+    // if (response.error != null) {
+    //   print(response);
+    // } else {
+    //   print('Notification saved  successfully');
+    // }
   }
 
+  
 
+ streamProducts() async {
+   final client = GetIt.instance<SupabaseClient>();
+    final response = await client
+      .from('${'elephant'}_products')
+      // .stream(primaryKey: ['productId'])
+      .select('*')
+      .execute();
+  print('Task inserted successfully ${response}');
+    // return response;
+ List<Map<String, dynamic>>? leadLogs = (response.data as List).cast<Map<String, dynamic>>();
+    return leadLogs;
+
+}
+
+streamProductsNew() async {
+   final client = GetIt.instance<SupabaseClient>();
+    final response = await client
+      .from('${'elephant'}_products')
+      // .stream(primaryKey: ['productId'])
+      .select('*')
+      .execute();
+  print('Task inserted successfully ${response}');
+    // return response;
+
+     var leadLogs = response.data.map((json) {
+      // Access properties from the map
+      return 
+      
+      Product(
+      productId: json['productId'],
+      product_name: json['product_name'],
+      size: json['size'],
+      cost: json['cost'],
+      sell:json['sell'],
+      quantity: 0
+    );
+    }).toList();
+//  List<Map<String, dynamic>>? leadLogs = (response.data as List).cast<Map<String, dynamic>>();
+    return leadLogs;
+
+}
    Future<List<Map<String, dynamic>>?>  streamLeadActivityLog(uid) async {
     final client = GetIt.instance<SupabaseClient>();
    

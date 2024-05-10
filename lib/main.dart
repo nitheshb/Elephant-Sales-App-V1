@@ -90,8 +90,8 @@ void main() async {
   GetIt getIt = GetIt.instance;
 
   getIt.registerSingleton<SupabaseClient>(SupabaseClient(
-      'https://cezgydfbprzqgxkfcepq.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNlemd5ZGZicHJ6cWd4a2ZjZXBxIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NDU0NTA4NTQsImV4cCI6MTk2MTAyNjg1NH0.UDAQvbY_GqEdLLrZG6MFnhDWXonAbcYnrHGHDD6-hYU'));
+      'https://znfigawyllqdwerhfaig.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpuZmlnYXd5bGxxZHdlcmhmYWlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTI2NjU4MzIsImV4cCI6MjAyODI0MTgzMn0.wDMLvpmq1u34-jIexc_GRsqFv7he5WnNRzSHwjfCWrA'));
   // final supabaseClient = SupabaseClient(
   //   'https://cezgydfbprzqgxkfcepq.supabase.co',
   //   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNlemd5ZGZicHJ6cWd4a2ZjZXBxIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NDU0NTA4NTQsImV4cCI6MTk2MTAyNjg1NH0.UDAQvbY_GqEdLLrZG6MFnhDWXonAbcYnrHGHDD6-hYU',

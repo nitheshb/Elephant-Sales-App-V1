@@ -667,7 +667,7 @@ class HomeGradientPage extends StatelessWidget {
                                                 0.720,
                                         child: ListView.builder(
                                           itemCount: controller
-                                              .participantsANew.value.length,
+                                              .ComponentsANew.value.length,
                                           scrollDirection: Axis.horizontal,
                                           itemBuilder: (context, index) {
                                             return Padding(
@@ -682,7 +682,7 @@ class HomeGradientPage extends StatelessWidget {
                                                         .theme.colorPrimaryDark,
                                                     radius: 14,
                                                     child: Text(
-                                                        '${controller.participantsANew[index]['name'].substring(0, 2)}',
+                                                        '${controller.ComponentsANew[index]['name'].substring(0, 2)}',
                                                         style: TextStyle(
                                                             color: Colors.white,
                                                             fontSize: 10)),
@@ -1988,7 +1988,7 @@ class HomeGradientPage extends StatelessWidget {
                                                   0.720,
                                               child: ListView.builder(
                                                 itemCount: controller
-                                                    .participantsANew
+                                                    .ComponentsANew
                                                     .value
                                                     .length,
                                                 scrollDirection:
@@ -2008,7 +2008,7 @@ class HomeGradientPage extends StatelessWidget {
                                                               .colorPrimaryDark,
                                                           radius: 14,
                                                           child: Text(
-                                                              '${controller.participantsANew[index]['name'].substring(0, 2)}',
+                                                              '${controller.ComponentsANew[index]['name'].substring(0, 2)}',
                                                               style: TextStyle(
                                                                   color: Colors
                                                                       .white,

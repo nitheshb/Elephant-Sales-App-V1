@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:redefineerp/Screens/Home/homepage_controller.dart';
 import 'package:redefineerp/Screens/Task/task_controller.dart';
 
-class ContactController extends GetxController {
+class ProductCategoryListPageController extends GetxController {
 
 final homeController = Get.put<HomePageController>(HomePageController());
 
@@ -21,6 +21,7 @@ final homeController = Get.put<HomePageController>(HomePageController());
   var filterValue = 'All'.obs;
   var filterByEmployeeValue = 'ZA'.obs;
   var searchResult = ''.obs;
+  var category = '???'.obs;
 
   RxList participantsList = [].obs;
 

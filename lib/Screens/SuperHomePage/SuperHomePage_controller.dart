@@ -5,6 +5,7 @@ import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:redefineerp/Screens/Dashboard/dashboard_pages.dart';
 import 'package:redefineerp/Screens/Home/homepage.dart';
 import 'package:redefineerp/Screens/Notification/notification_pages.dart';
+import 'package:redefineerp/Screens/Products/productsList.dart';
 import 'package:redefineerp/Screens/Profile/profile_page.dart';
 import 'package:redefineerp/Screens/Search/search_task.dart';
 
@@ -17,7 +18,7 @@ class NavItem {
 
 class FullAppController extends GetxController {
   int currentIndex = 1;
-  int pages = 4;
+  int pages = 5;
   late TabController tabController;
 
   final TickerProvider tickerProvider;
@@ -33,14 +34,16 @@ class FullAppController extends GetxController {
       NavItem('Dashboard', FeatherIcons.airplay),
       NavItem('Products', FeatherIcons.server),
       NavItem('Orders', FeatherIcons.search),
+      NavItem('Orders', FeatherIcons.codepen),
       NavItem('Profile', FeatherIcons.user),
     ];
 
     items = [
         HomePage(),
       const DashboardPage(),
-    
+
       const SearchPage(),
+      ProductsPage(),
       const ProfilePage(),
     ];
   }

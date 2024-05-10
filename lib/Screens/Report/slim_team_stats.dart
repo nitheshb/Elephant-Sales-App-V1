@@ -73,7 +73,6 @@ Widget statusBarItems(title) {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                
                           StreamBuilder<QuerySnapshot>(
         stream: title== "Tasks" ? FirebaseFirestore.instance
             .collection('spark_assignedTasks')

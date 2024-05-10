@@ -20,10 +20,13 @@ import 'package:redefineerp/Screens/Contact/contact_list_dialog.dart';
 import 'package:redefineerp/Screens/Contact/contact_list_page.dart';
 import 'package:redefineerp/Screens/Contact/contacts_controller.dart';
 import 'package:redefineerp/Screens/Home/homepage2.dart';
-import 'package:redefineerp/Screens/Home/homepage_controller.dart';
+
 import 'package:redefineerp/Screens/Home/homepage_gradient.dart';
 import 'package:redefineerp/Screens/Leads/LeadsDetails.dart';
 import 'package:redefineerp/Screens/Notification/notification_pages.dart';
+import 'package:redefineerp/Screens/ProductListCategoryPopUp/product_category_list.dart';
+import 'package:redefineerp/Screens/ProductListCategoryPopUp/product_category_list_controler.dart';
+import 'package:redefineerp/Screens/Products/productList_Controller.dart';
 import 'package:redefineerp/Screens/Profile/profile_page.dart';
 import 'package:redefineerp/Screens/Report/report_page.dart';
 import 'package:redefineerp/Screens/Report/slim_team_stats.dart';
@@ -45,6 +48,7 @@ import 'package:redefineerp/Widgets/headerbg.dart';
 import 'package:redefineerp/Widgets/minimsg.dart';
 import 'package:redefineerp/Widgets/task_sheet_widget.dart';
 import 'package:redefineerp/helpers/firebase_help.dart';
+import 'package:redefineerp/helpers/supabae_help.dart';
 import 'package:redefineerp/themes/container.dart';
 import 'package:redefineerp/themes/customTheme.dart';
 import 'package:redefineerp/themes/spacing.dart';
@@ -87,12 +91,12 @@ void callbackDispatcher() {
   });
 }
 
-class HomePage extends StatefulWidget {
+class ProductsPage extends StatefulWidget {
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<ProductsPage> createState() => _ProductsPageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _ProductsPageState extends State<ProductsPage> {
   //  late CustomTheme customTheme;
   //   late ThemeData theme;
   Iterable<CallLogEntry> _callLogEntries = <CallLogEntry>[];
@@ -101,14 +105,35 @@ class _HomePageState extends State<HomePage> {
       FirebaseStorage.instance.ref().child('images/image.jpg');
 
   ImagePicker picker = ImagePicker();
-
+var products = [];
   XFile? image;
   @override
   void initState() {
     super.initState();
+    fetchProducts();
     call();
   }
+  void fetchProducts() async {
+    final response = await DbSupa.instance.streamProductsNew();
+    print('my value is x ${response}');
+    setState(() {
+      products = response;
+      // products = response.map((json) => Product.fromJson(json)).toList();
+    });
+  }
 
+  void updateQuantity(Product product, int newQuantity) async {
+    // Update quantity of the product in Supabase
+    // final response = await widget.supabase.from('products').update({'quantity': newQuantity}).eq('id', product.id).execute();
+    // if (response.error != null) {
+    //   // Handle error
+    //   print('Error updating quantity: ${response.error}');
+    //   return;
+    // }
+    setState(() {
+      product.quantity = newQuantity;
+    });
+  }
   void call() async {
     // Firestore to fetch recent record
     final controller2 = Get.put<AuthController>(AuthController());
@@ -192,11 +217,12 @@ class _HomePageState extends State<HomePage> {
     //   print('SIM NAME   : ${entry.simDisplayName}');
     //   print('-------------------------------------');
     // }
-    final controller = Get.put<HomePageController>(HomePageController());
+    final controller = Get.put<ProductListPageController>(ProductListPageController());
+    final productCategoryController = Get.put<ProductCategoryListPageController>(ProductCategoryListPageController());
     final controller2 = Get.put<AuthController>(AuthController());
     final controller1 = Get.put<ContactController>(ContactController());
     // MySearchController searchController =
-    //     Get.put<MySearchController>(SearchController());
+    // Get.put<MySearchController>(SearchController());
     // TaskController controller1 = Get.put<TaskController>(TaskController());
     debugPrint("home called ${FirebaseAuth.instance.currentUser}");
     debugPrint("home calledc ${controller2.currentUserObj}");
@@ -301,7 +327,7 @@ class _HomePageState extends State<HomePage> {
                           children: [
                             TextFormField(
                               validator: controller.validateTaskTitle,
-                              controller: controller.taskTitle,
+                              controller: controller.productTitle,
                               onChanged: controller.validateTaskTitle,
                               decoration: const InputDecoration(
                                   border: InputBorder.none,
@@ -331,10 +357,11 @@ class _HomePageState extends State<HomePage> {
                                 ),
                                   Expanded(
                                   child: TextField(
+                                       controller: controller.costPrice,
                                     decoration: const InputDecoration(
                                         border: InputBorder.none,
-                                        labelText: 'Min Price',
-                                        hintText: 'Min Price'),
+                                        labelText: 'Cost Price',
+                                        hintText: 'Cost Price'),
                                     style: const TextStyle(
                                         fontSize: 15, fontWeight: FontWeight.w400),
                                     autofocus: true,
@@ -342,10 +369,11 @@ class _HomePageState extends State<HomePage> {
                                 ),
                                  Expanded(
                                   child: TextField(
+                                       controller: controller.sellPrice,
                                     decoration: const InputDecoration(
                                         border: InputBorder.none,
-                                        labelText: 'Max Price',
-                                        hintText: 'Max Price'),
+                                        labelText: 'Sell Price',
+                                        hintText: 'Sell Price'),
                                     style: const TextStyle(
                                         fontSize: 15, fontWeight: FontWeight.w400),
                                     onSubmitted: (value) {
@@ -377,164 +405,7 @@ class _HomePageState extends State<HomePage> {
                                                         BorderRadius.circular(
                                                             8),
                                                   ),
-                                                  child: ContactListPage()))
-                                    },
-                                    child: Row(
-                                      children: [
-                                        SizedBox(
-                                          child: Material(
-                                            type: MaterialType.transparency,
-                                            child: CircleAvatar(
-                                              backgroundColor:
-                                                  Get.theme.colorPrimaryDark,
-                                              radius: 17,
-                                              child: Text(
-                                                  '${controller.assignedUserName.value.substring(0, 2)}',
-                                                  style: const TextStyle(
-                                                      color: Colors.white)),
-                                            ),
-                                          ),
-                                        ),
-                                        Obx(() => Padding(
-                                              padding: const EdgeInsets.only(
-                                                  left: 8.0, bottom: 4),
-                                              child: Column(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.start,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  SizedBox(
-                                                    height: 16,
-                                                    child: Text(
-                                                      'Material',
-                                                      style: Get.theme.kSubTitle
-                                                          .copyWith(
-                                                              color: Get.theme
-                                                                  .kLightGrayColor),
-                                                    ),
-                                                  ),
-                                                  SizedBox(
-                                                    height: 22,
-                                                    child: Text(
-                                                      controller
-                                                          .assignedUserName
-                                                          .value,
-                                                      style: Get.theme
-                                                          .kPrimaryTxtStyle
-                                                          .copyWith(
-                                                              color: Get.theme
-                                                                  .kBadgeColor),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            )),
-                                      ],
-                                    ),
-                                  ),
-
-                                  // Due Date
-
-                                  InkWell(
-                                    onTap: () => {
-                    
-                                    },
-                                    child: Row(
-                                      children: [
-                                        SizedBox(
-                                          child: Material(
-                                              type: MaterialType.transparency,
-                                              child: DottedBorder(
-                                                borderType: BorderType.Circle,
-                                                color:
-                                                    Get.theme.kLightGrayColor,
-                                                radius:
-                                                    const Radius.circular(27.0),
-                                                dashPattern: [3, 3],
-                                                strokeWidth: 1,
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(6.0),
-                                                  child: Icon(
-                                                    Icons
-                                                        .calendar_month_outlined,
-                                                    size: 18,
-                                                    color: Get
-                                                        .theme.kLightGrayColor,
-                                                  ),
-                                                ),
-                                              )
-                                       
-                                              ),
-                                        ),
-                                        Obx(() => Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          left: 8.0, bottom: 4),
-                                                  child: Column(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment.start,
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      SizedBox(
-                                                        height: 16,
-                                                        child: Text(
-                                                          'Sub Category',
-                                                          style: Get
-                                                              .theme.kSubTitle
-                                                              .copyWith(
-                                                                  color: Get
-                                                                      .theme
-                                                                      .kLightGrayColor),
-                                                        ),
-                                                      ),
-                                                      SizedBox(
-                                                        height: 22,
-                                                        child: Text(
-                                                            controller
-                                                                .selectedDateTime
-                                                                .value,
-                                                            style: Get.theme
-                                                                .kNormalStyle
-                                                                .copyWith(
-                                                                    color: Get
-                                                                        .theme
-                                                                        .kBadgeColor)),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                )
-                                       
-                                            ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                           
-                           
-                           SizedBox(height: 14,),
-                          Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  // assign to
-
-                                  InkWell(
-                                    onTap: () => {
-                                      showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) =>
-                                              Dialog(
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8),
-                                                  ),
-                                                  child: ContactListPage()))
+                                                  child: ProductCategoryListPage()))
                                     },
                                     child: Row(
                                       children: [
@@ -574,8 +445,8 @@ class _HomePageState extends State<HomePage> {
                                                   SizedBox(
                                                     height: 22,
                                                     child: Text(
-                                                      controller
-                                                          .assignedUserName
+                                                      productCategoryController
+                                                          .category
                                                           .value,
                                                       style: Get.theme
                                                           .kPrimaryTxtStyle
@@ -674,7 +545,7 @@ class _HomePageState extends State<HomePage> {
                            
                            
                            SizedBox(height: 14,),
-                           
+                        
                             const SizedBox(
                               height: 8,
                             ),
@@ -687,7 +558,7 @@ class _HomePageState extends State<HomePage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Components',
+                                    'Process',
                                     style: Get.theme.kSubTitle.copyWith(
                                         color: const Color(0xff707070),
                                         fontSize: 16),
@@ -1054,12 +925,25 @@ StreamBuilder<QuerySnapshot>(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             for (var item in [
-              {'label': 'New', 'value': 'new'},
-              {'label': 'Followup', 'value': 'followup'},
-              {'label': 'Visit Fixed', 'value': 'visitfixed'},
-              {'label': 'Visit Done', 'value': 'visitdone'},
-              {'label': 'negotiation', 'value': 'negotiation'},       
-               {'label': 'Not Interested', 'value': 'notinterested'},
+              {'label': 'All', 'value': 'new'},
+              {'label': 'Pillars', 'value': 'pillar'},
+              {'label': 'Beams', 'value': 'beam'},
+              {'label': 'Corner Boxes', 'value': 'cornerbox'},
+              {'label': 'Chain Blocks', 'value': 'chainblock'},
+              {'label': 'Chain Pulleys', 'value': 'chainpulley'},
+              {'label': 'Hinges', 'value': 'hinges'},       
+              {'label': 'Hammers', 'value': 'hammers'},
+              {'label': 'Lighting Clamps', 'value': 'clamps'},
+
+              {'label': 'Ms Bases', 'value': 'bases'},
+              {'label': 'Ms Half Bullets', 'value': 'mshalfbullets'},
+              {'label': 'R-pins', 'value': 'rpins'},
+
+              {'label': 'Support Rods', 'value': 'supportrod'},
+           
+              {'label': 'Tapper Pins & Connectors', 'value': 'tapperpinsconnectors'},
+                 
+            
              
             ])
               Padding(
@@ -1183,12 +1067,12 @@ StreamBuilder<QuerySnapshot>(
               // body: controller.streamToday()
               body: Center(child: () {
 
-                if(controller.myLeadStatusCategory.value == 'allBusinessTasks'){
-  return _LeadsTasksList(context, controller2);
-                }else if(['new','followup','visitfixed','visitdone','negotiation', 'notinterested','junk', 'booked'].contains(controller.myLeadStatusCategory.value)){
-
+                if(controller.myLeadStatusCategory.value == 'all'){
+     
+                    return _LeadsTasksList(context, controller2);
+                }else if(['all','pillar','beam','cornerbox','chainblock', 'chainpulley','hinges', 'hammers','clamps','bases','mshalfbullets', 'rpins', 'supportrod', 'tapperpinsconnectors'].contains(controller.myLeadStatusCategory.value)){
+                               return _LeadsListNew(context, controller, controller2);
                     return _LeadsList(context, controller, controller2);
-
                 }
                 switch (controller.myLeadStatusCategory.value) {
                   case 'projects':
@@ -1599,40 +1483,16 @@ StreamBuilder<QuerySnapshot>(
       ),
     );
   }
-
-  Widget _LeadsList(context,controller, controller2) {
-    return StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection("${controller2.currentUserObj['orgId']}_customers")
-            // .where("assignedTo", isEqualTo: FirebaseAuth.instance.currentUser!.uid)
-        //     .where("Status", whereIn: [
-        //   'new',
-        //   'followup',
-        //   'visitfixed',
-        //   'visitdone'
-        // ]).snapshots(), 
-        //
- .where("Status", isEqualTo: controller.myLeadStatusCategory.value).snapshots(),
-        
-        // stream: DbQuery.instanace.getStreamCombineTasks(),
-        builder: (context, snapshot) {
-          //     if (!snapshot.hasData) {
-          //   return CircularProgressIndicator();
-          // }
-          if (snapshot.hasError) {
-            return const Center(
-              child: Text("Something went wrong! 😣..."),
-            );
-          } else if (snapshot.hasData) {
-            return Column(
+ Widget _LeadsListNew(context,controller, controller2) {
+     return   Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(height: 22),
                 Row(
                   children: [
                     SizedBox(width: 5,),
-                    Text('you have ',style: appLightTheme.bodyHigh,),
-                    Text('${snapshot.data?.docs.length} due events',style: appLightTheme.bodyHigh.copyWith(color: Color(0xffE7A166)),),
+                    Text('you have ${controller.myLeadStatusCategory.value} ',style: appLightTheme.bodyHigh,),
+                    Text('${products.length} due events',style: appLightTheme.bodyHigh.copyWith(color: Color(0xffE7A166)),),
                   ],
                 ),
                 Expanded(
@@ -1644,39 +1504,129 @@ StreamBuilder<QuerySnapshot>(
                       child: ListView.builder(
                           shrinkWrap: true,
                           physics: const BouncingScrollPhysics(),
-                          itemCount: snapshot.data?.docs.length,
+                          itemCount: products.length,
                           itemBuilder: (context, i) {
-                            var projData = snapshot.data?.docs[i];
-
-                            return _buildLeadsCard(context, projData);
+                            var projData = products[i];
+                            return _buildLeadsCard(context,controller,  projData);
                           }),
                     ),
                   ),
                 ),
               ],
             );
-          } else {
-            return Text('No Data');
+  return  ListView.builder(
+        itemCount: products.length,
+        itemBuilder: (context, index) {
+          final product = products[index];
+       
+          
+          return ListTile(
+            title: Text(product.product_name),
+            subtitle: Text('Price: \$${product.size}'),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('Quantity: ${product.quantity}'),
+                IconButton(
+                  icon: Icon(Icons.add),
+                  onPressed: () {
+                    updateQuantity(product, product.quantity + 1);
+                  },
+                ),
+                IconButton(
+                  icon: Icon(Icons.remove),
+                  onPressed: () {
+                    // if (product.size > 0) {
+                    //   // updateQuantity(product, product.quantity - 1);
+                    // }
+                  },
+                ),
+              ],
+            ),
+          );
+        },
+      );
+ }
+  Widget _LeadsList(context,controller, controller2) {
+    return StreamBuilder<List<Map<String, dynamic>>?>(
+        stream: DbSupa.instance.streamProducts().asStream(),
+
+    
+        // stream: DbQuery.instanace.getStreamCombineTasks(),
+        builder: (context, snapshot) {
+          //     if (!snapshot.hasData) {
+          //   return CircularProgressIndicator();
+          // }
+       if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Text('No lead activity logs found.');
+        } else {
+        List<Map<String, dynamic>> fullData = snapshot.data!;
+         var productData = fullData.where((data)=> data['cat'] == controller.myLeadStatusCategory.value).toList();
+             print('value is ==> ${productData}');
+productData = productData.map((data) {
+  data['quantity'] = 0;
+  return data;
+}).toList();
+       
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 22),
+                Row(
+                  children: [
+                    SizedBox(width: 5,),
+                    Text('you have ${controller.myLeadStatusCategory.value} ',style: appLightTheme.bodyHigh,),
+                    Text('${productData.length} due events',style: appLightTheme.bodyHigh.copyWith(color: Color(0xffE7A166)),),
+                  ],
+                ),
+                Expanded(
+                  child: MediaQuery.removePadding(
+                    context: context,
+                    removeTop: true,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 10.0),
+                      child: ListView.builder(
+                          shrinkWrap: true,
+                          physics: const BouncingScrollPhysics(),
+                          itemCount: productData.length,
+                          itemBuilder: (context, i) {
+                            var projData = productData[i];
+                            return _buildLeadsCard(context,controller,  projData);
+                          }),
+                    ),
+                  ),
+                ),
+              ],
+            );
           }
         });
   }
 
-  Widget _buildLeadsCard(context, _list) {
-    String lead_Remarks = _list?.data()?.containsKey('Remarks') == true
-        ? _list!['Remarks']
-        : 'NA';
+  Widget _buildLeadsCard(context, controller, product) {
+    print('data is ${product.product_name} ${product}');
 
-         var cost = _list?.data()?.containsKey('cost') == true
-        ? _list!['cost']
-        : 0;
+    // String lead_Remarks = _list?.containsKey('Remarks') == true
+    //     ? _list!['Remarks']
+    //     : 'NA';
 
-    String lead_Name =
-        _list?.data()?.containsKey('name') == true ? _list!['name'] : 'NA';
+    //      var sell = _list?.containsKey('sell') == true
+    //     ? _list!['sell']
+    //     : 0; 
+    //     var cost = _list?.containsKey('cost') == true
+    //     ? _list!['cost']
+    //     : 0;
 
-    String lead_status =
-        _list?.data()?.containsKey('Status') == true ? _list!['Status'] : 'NA';
-    String lead_Mobile =
-        _list?.data()?.containsKey('Mobile') == true ? _list!['Mobile'] : 'NA';
+    // String lead_Name =
+    //     _list?.containsKey('product_name') == true ? _list.product_name: 'NA';
+
+    // String size =
+    //     _list?.containsKey('size') == true ? _list!['size'] : 'NA';
+    // String lead_Mobile =
+    //     _list?.containsKey('Mobile') == true ? _list!['Mobile'] : 'NA';
+
+
 
     return Container(
       margin: FxSpacing.only(left:8, right: 8, bottom: 0, top: 8),
@@ -1691,7 +1641,7 @@ StreamBuilder<QuerySnapshot>(
               _callLogEntries = result;
             });
             Get.to(() => LeadsDetailsScreen(
-                  leadDetails: _list,
+                  leadDetails: product,
                   callLogEntries: _callLogEntries,
                 ));
           },
@@ -1712,20 +1662,23 @@ StreamBuilder<QuerySnapshot>(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Text(lead_Name!, style:appLightTheme.bodyMedium.copyWith(fontSize: 14,  letterSpacing: 1.25,)),
-                      Text(lead_Remarks, style:appLightTheme.kSubTitle),
+                      Text('${product.product_name}(${product.size})'!, style:appLightTheme.bodyMedium.copyWith(fontSize: 14,  letterSpacing: 1.25,)),
                     
                       
-                      FxText.bodySmall(
-                      color: Color(0xffD2D2D2),
-        
-                        lead_status,
-                        fontSize: 12,
-                        muted: true,
-                        letterSpacing: 1.25,
-                        fontWeight: 500,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      Row(
+                        children: [
+                        FxText.bodySmall(
+                          color: Color(0xffD2D2D2),
+                                  
+                          '${product.cost}',
+                            fontSize: 12,
+                            muted: true,
+                            letterSpacing: 1.25,
+                            fontWeight: 500,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -1733,7 +1686,7 @@ StreamBuilder<QuerySnapshot>(
               ),
               InkWell(
                 onTap: () {
-                  _callNumber(lead_Mobile);
+                  // _callNumber(lead_Mobile);
                   print('res iss ');
         
                   // setState(() {
@@ -1741,12 +1694,52 @@ StreamBuilder<QuerySnapshot>(
                   // });
                 },
                 child: Container(
+                         margin: FxSpacing.right(16),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.end,
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                        Text('₹ ${cost}', style:appLightTheme.kTitleStyle.copyWith(fontSize: 16)),
-                         Text("you'll get", style:appLightTheme.kSubTitle),
+                        Text('₹ ${product.sell}', style:appLightTheme.kTitleStyle.copyWith(fontSize: 16)),
+                         Row(
+                        children: [
+                            InkWell(
+                    onTap: () {
+               if (product.quantity > 0) {
+                      updateQuantity(product, product.quantity - 1);
+                    }
+                    },
+                    child: FxContainer.rounded(
+                      color: Color(0xff58423B),
+                      paddingAll: 8,
+                      child: Icon(
+                        Icons.remove,
+                        color: Get.theme.onPrimary,
+                        size: 16,
+                      ),
+                    ),
+                  ),
+                        Text('${product.quantity}', style:appLightTheme.kTitleStyle.copyWith(fontSize: 16)),
+
+                     InkWell(
+                    onTap: () {
+                  // setState(() {
+                  //     _list['quantity'] = 10;
+                  //   });
+                    //  controller.increment(_list);
+                     updateQuantity(product, product.quantity + 1);
+                    },
+                    child: FxContainer.rounded(
+                      color: Color(0xff58423B),
+                      paddingAll: 8,
+                      child: Icon(
+                        Icons.add,
+                        color: Get.theme.onPrimary,
+                        size: 16,
+                      ),
+                    ),
+                  ),
+                        ],
+                      ),
                    
                     ],
                   ),
@@ -1976,7 +1969,7 @@ StreamBuilder<QuerySnapshot>(
         // FxSpacing.width(8),
  
          Text(
-                                "Elephant Truss",
+                                "Products List",
                             
                                  style: TextStyle(
                             fontFamily: 'SpaceGrotesk', // Use the font family you declared
@@ -2014,4 +2007,28 @@ StreamBuilder<QuerySnapshot>(
   int _getStatusCount( data, String status) {
   return data.where((lead) => lead['Status'] == status).length;
 }
+}
+
+class Product {
+  final String productId;
+  final String product_name;
+  final String size;
+  // final double sell;
+  int cost;
+  int sell;
+  int quantity;
+
+  // ignore: non_constant_identifier_names
+  Product({required this.productId, required this.product_name, required this.size, required this.cost,required this.sell,  required this.quantity});
+
+  factory Product.fromJson(Map<String, dynamic> json) {
+    return Product(
+      productId: json['productId'],
+      product_name: json['product_name'],
+      size: json['size'],
+      cost: json['cost'],
+      sell: json['sell'],
+      quantity: 0
+    );
+  }
 }
